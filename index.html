@@ -53,7 +53,6 @@
             }
         }
 
-        /* Header */
         .page-title {
             font-size: 1.4rem;
             font-weight: 600;
@@ -78,7 +77,6 @@
             flex-shrink: 0;
         }
 
-        /* Cards */
         .glass-card {
             background: rgba(17, 24, 39, 0.85);
             backdrop-filter: blur(10px);
@@ -88,7 +86,6 @@
             box-shadow: var(--shadow-soft);
         }
 
-        /* Labels */
         .section-title {
             font-size: 0.78rem;
             text-transform: uppercase;
@@ -98,7 +95,6 @@
             font-weight: 600;
         }
 
-        /* Pill */
         .pill {
             padding: 4px 10px;
             border-radius: 999px;
@@ -111,7 +107,6 @@
             white-space: nowrap;
         }
 
-        /* Badges */
         .badge-soft {
             padding: 5px 12px;
             border-radius: 999px;
@@ -142,7 +137,6 @@
             color: #fecaca;
         }
 
-        /* Scenario Buttons */
         .scenario-btn {
             width: 100%;
             border-radius: 14px;
@@ -205,7 +199,7 @@
             color: #ef4444;
         }
 
-        /* Form Controls */
+
         .form-select-sm {
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(75, 85, 99, 0.7);
@@ -245,7 +239,7 @@
             border-radius: 10px;
         }
 
-        /* Controls Grid */
+        
         .controls-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -261,7 +255,7 @@
             font-weight: 500;
         }
 
-        /* Summary */
+        
         .status-pill {
             display: flex;
             align-items: center;
@@ -298,7 +292,7 @@
             50% { opacity: 0.5; }
         }
 
-        /* Metrics */
+        
         .row.g-2 {
             margin-top: 10px;
         }
@@ -320,7 +314,7 @@
             margin-top: 4px;
         }
 
-        /* Log Box */
+        
         .log-box {
             height: 260px;
             padding: 15px;
@@ -376,7 +370,7 @@
             word-break: break-word;
         }
 
-        /* Analyzer Tabs */
+        
         .analyzer-tabs {
             display: flex;
             gap: 8px;
@@ -444,7 +438,7 @@
             color: #e5e7eb;
         }
 
-        /* Chips */
+    
         .chip {
             padding: 5px 10px;
             border: 1px solid rgba(75, 85, 99, 0.9);
@@ -457,7 +451,7 @@
             gap: 5px;
         }
 
-        /* Responsive adjustments */
+       
         @media (max-width: 768px) {
             .controls-grid {
                 grid-template-columns: 1fr;
@@ -473,7 +467,7 @@
             }
         }
 
-        /* Custom scrollbar */
+        
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -498,7 +492,7 @@
 <body class="dark-mode">
     <div class="app-shell container-fluid">
         
-        <!-- HEADER -->
+        
         <div class="row g-3 align-items-center mb-3">
             <div class="col-md-8">
                 <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
@@ -523,10 +517,10 @@
             </div>
         </div>
 
-        <!-- MAIN GRID -->
+        
         <div class="row g-3">
 
-            <!-- LEFT PANEL -->
+            
             <div class="col-lg-4">
                 <div class="glass-card mb-3">
                     <div class="section-title">Scenarios</div>
@@ -576,7 +570,7 @@
                     </div>
                 </div>
 
-                <!-- SUMMARY -->
+
                 <div class="glass-card">
                     <div class="section-title">Summary</div>
 
@@ -594,10 +588,10 @@
                 </div>
             </div>
 
-            <!-- RIGHT PANEL -->
+            
             <div class="col-lg-8">
 
-                <!-- Log Box -->
+                
                 <div class="glass-card mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="section-title">Execution Timeline</div>
@@ -608,7 +602,7 @@
                     <div id="logBox" class="log-box"></div>
                 </div>
 
-                <!-- Analyzer Panel -->
+                
                 <div class="glass-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="section-title">Analyzer Panel</div>
@@ -689,13 +683,13 @@
             document.getElementById("analysisPattern").innerHTML = "Synchronization pattern will be shown here.";
             document.getElementById("analysisSolution").innerHTML = "Complete solution code will appear here.";
 
-            // Reset active button
+           
             ["btnRace", "btnSafe", "btnDeadlock"].forEach((btn) =>
                 document.getElementById(btn).classList.remove("active")
             );
         }
 
-        /* Logging Lines */
+       
         function logLine(type, who, msg, runId) {
             if (runId !== currentRunId) return;
 
@@ -721,7 +715,7 @@
             box.scrollTop = box.scrollHeight;
         }
 
-        /* Status Light */
+        
         function setStatus(text, mode) {
             const dot = document.getElementById("statusDot");
             const txt = document.getElementById("statusText");
@@ -730,7 +724,7 @@
             txt.textContent = text;
         }
 
-        /* Summary */
+        
         function updateSummary(obj) {
             document.getElementById("metricScenario").textContent = obj.scenario;
             document.getElementById("metricIssue").textContent = obj.issue;
@@ -738,14 +732,14 @@
             document.getElementById("metricVerdict").textContent = obj.verdict;
         }
 
-        /* Badge update */
+        
         function updateSeverityBadge(level, text) {
             const badge = document.getElementById("severityBadge");
             badge.className = "badge-soft " + level;
             badge.textContent = text;
         }
 
-        /* Tab Switching */
+        
         function switchTab(tab) {
             let allTabs = ["overview", "cause", "fix", "pattern", "solution"];
 
@@ -760,19 +754,19 @@
                 .classList.add("active");
         }
 
-        /* Delay based on speed slider */
+        
         function getDelay() {
             const speed = parseInt(document.getElementById("speedSlider").value);
             const delays = { 1: 700, 2: 450, 3: 250, 4: 120 };
             return delays[speed] || 250;
         }
 
-        /* Thread Count */
+        
         function getThreadCount() {
             return parseInt(document.getElementById("threadCount").value);
         }
 
-        /* Active Button */
+        
         function markActiveScenario(id) {
             ["btnRace", "btnSafe", "btnDeadlock"].forEach((btn) =>
                 document.getElementById(btn).classList.remove("active")
@@ -780,9 +774,7 @@
             document.getElementById(id).classList.add("active");
         }
 
-        /* ------------------------------------
-           RACE CONDITION SIMULATION
-        ------------------------------------ */
+       
         function runRaceCondition() {
             if (isRunning) return;
             isRunning = true;
@@ -869,9 +861,7 @@ This ensures atomic access to the shared counter.`
             switchTab("solution");
         }
 
-        /* ------------------------------------
-           SAFE SYNCHRONIZATION
-        ------------------------------------ */
+        
         function runSafeSync() {
             if (isRunning) return;
             isRunning = true;
@@ -985,10 +975,6 @@ Always ensure lock is released even if exceptions occur.`
             isRunning = false;
             switchTab("solution");
         }
-
-        /* ------------------------------------
-           DEADLOCK SIMULATION
-        ------------------------------------ */
         function runDeadlock() {
             if (isRunning) return;
             isRunning = true;
@@ -1014,7 +1000,7 @@ Always ensure lock is released even if exceptions occur.`
 
             logLine("system", "SYSTEM", "Deadlock simulation started with 2 threads", runId);
 
-            // Simulate deadlock sequence
+            
             setTimeout(() => {
                 if (runId !== currentRunId) return;
                 logLine("thread", "T1", "Acquired lock on Resource A", runId);
@@ -1055,19 +1041,19 @@ Always ensure lock is released even if exceptions occur.`
                 "Pattern: Circular wait → deadlock",
                 `<b>Solution:</b><br>
 Always acquire locks in a predefined global order:<br><pre>
-// CORRECT: Both threads acquire locks in same order
+
 void thread1() {
     lock(A);
     lock(B);
-    // critical section
+    
     unlock(B);
     unlock(A);
 }
 
 void thread2() {
-    lock(A);    // Same order as thread1
+    lock(A);    
     lock(B);
-    // critical section
+    
     unlock(B);
     unlock(A);
 }</pre>
@@ -1076,7 +1062,7 @@ Alternative: Use try-lock with timeout:<br><pre>
 pthread_mutex_trylock(&lockB);
 if (failed) {
     pthread_mutex_unlock(&lockA);
-    // retry or handle
+    
 }</pre>`
             );
 
@@ -1084,9 +1070,7 @@ if (failed) {
             switchTab("solution");
         }
 
-        /* ------------------------------------
-           HELPER FUNCTIONS
-        ------------------------------------ */
+        
         function fillAnalyzer(overview, cause, fix, pattern, solution) {
             document.getElementById("analysisOverview").innerHTML = overview;
             document.getElementById("analysisCause").innerHTML = cause;
@@ -1095,10 +1079,10 @@ if (failed) {
             document.getElementById("analysisSolution").innerHTML = solution;
         }
 
-        /* Initialize */
+        
         clearLogAndAnalysis();
         
-        // Add event listeners for better UX
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Speed slider value display
             const speedSlider = document.getElementById('speedSlider');
@@ -1108,7 +1092,7 @@ if (failed) {
                 this.parentElement.querySelector('.text-muted:nth-child(3)').textContent = speedDisplay;
             });
             
-            // Thread count update
+           
             const threadSelect = document.getElementById('threadCount');
             threadSelect.addEventListener('change', function() {
                 document.getElementById('metricThreads').textContent = this.value;
@@ -1116,4 +1100,5 @@ if (failed) {
         });
     </script>
 </body>
+
 </html>

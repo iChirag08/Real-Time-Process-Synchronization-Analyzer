@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-Time Process Synchronization Analyzer</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-main: #020617;
+            --bg-card: #111827;
+            --accent-primary: #6366f1;
+            --accent-danger: #ef4444;
+            --accent-warning: #facc15;
+            --accent-success: #22c55e;
+            --text-main: #e5e7eb;
+            --text-muted: #9ca3af;
+            --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at top left, #1e2a47 0%, #020617 50%);
+            color: var(--text-main);
+            font-family: "Poppins", sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Page Layout */
+        .app-shell {
+            padding: 32px 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            .app-shell {
+                padding: 40px 40px;
+            }
+        }
+
+        /* Header */
+        .page-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .page-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .page-title-icon {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            border-radius: 50%;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(145deg, #4f46e5, #2d2a63);
+            color: white;
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.6);
+            flex-shrink: 0;
+        }
+
+        /* Cards */
+        .glass-card {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* Labels */
+        .section-title {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* Pill */
+        .pill {
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        /* Badges */
+        .badge-soft {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .badge-soft.info {
+            background: rgba(59, 130, 246, 0.18);
+            color: #bfdbfe;
+        }
+
+        .badge-soft.ok {
+            background: rgba(34, 197, 94, 0.18);
+            color: #6ee7b7;
+        }
+
+        .badge-soft.warn {
+            background: rgba(234, 179, 8, 0.18);
+            color: #fde68a;
+        }
+
+        .badge-soft.danger {
+            background: rgba(248, 113, 113, 0.18);
+            color: #fecaca;
+        }
+
+        /* Scenario Buttons */
+        .scenario-btn {
+            width: 100%;
+            border-radius: 14px;
+            background: rgba(17, 24, 39, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .scenario-btn:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 12px 30px rgba(79, 70, 229, 0.4);
+        }
+
+        .scenario-btn.active {
+            border-color: var(--accent-primary);
+            background: rgba(79, 70, 229, 0.15);
+            box-shadow: 0 0 20px rgba(129, 140, 248, 0.5);
+        }
+
+        .scenario-btn .label {
+            flex: 1;
+        }
+
+        .scenario-btn .label small {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .scenario-btn .icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .scenario-btn.race .icon {
+            color: #facc15;
+        }
+
+        .scenario-btn.safe .icon {
+            color: #22c55e;
+        }
+
+        .scenario-btn.deadlock .icon {
+            color: #ef4444;
+        }
+
+        /* Form Controls */
+        .form-select-sm {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(75, 85, 99, 0.7);
+            color: var(--text-main);
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .form-select-sm:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25);
+        }
+
+        .form-range {
+            width: 100%;
+            height: 6px;
+            background: rgba(75, 85, 99, 0.5);
+            border-radius: 10px;
+            outline: none;
+            
+        }
+
+        .form-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            cursor: pointer;
+            border: 2px solid #1e293b;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 10px;
+        }
+
+        /* Controls Grid */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .small-label {
+            font-size: 0.73rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        /* Summary */
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(55, 65, 81, 0.6);
+            width: fit-content;
+            margin-bottom: 20px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .status-dot.idle {
+            background: #6b7280;
+        }
+
+        .status-dot.running {
+            background: var(--accent-success);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.error {
+            background: var(--accent-danger);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Metrics */
+        .row.g-2 {
+            margin-top: 10px;
+        }
+
+        .metric {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            background: rgba(15, 23, 42, 0.6);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(55, 65, 81, 0.3);
+        }
+
+        .metric .value {
+            display: block;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Log Box */
+        .log-box {
+            height: 260px;
+            padding: 15px;
+            border-radius: 14px;
+            border: 1px solid rgba(30, 64, 175, 0.6);
+            font-family: "JetBrains Mono", monospace;
+            background: rgba(2, 6, 23, 0.7);
+            overflow-y: auto;
+            font-size: 0.78rem;
+            line-height: 1.5;
+        }
+
+        .log-line {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 8px;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(55, 65, 81, 0.2);
+        }
+
+        .log-line:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            color: #6b7280;
+            min-width: 70px;
+            font-size: 0.75rem;
+        }
+
+        .log-tag {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .log-tag.thread {
+            background: rgba(59, 130, 246, 0.25);
+            color: #bfdbfe;
+        }
+
+        .log-tag.system {
+            background: rgba(148, 163, 184, 0.25);
+            color: white;
+        }
+
+        .log-msg {
+            color: #e5e7eb;
+            flex: 1;
+            word-break: break-word;
+        }
+
+        /* Analyzer Tabs */
+        .analyzer-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .analyzer-tab-btn {
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(75, 85, 99, 0.8);
+            background: rgba(17, 24, 39, 0.6);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .analyzer-tab-btn:hover {
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .analyzer-tab-btn.active {
+            border-color: var(--accent-primary);
+            background: rgba(79, 70, 229, 0.2);
+            color: white;
+        }
+
+        .analyzer-section {
+            display: none;
+            padding: 15px;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 12px;
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            line-height: 1.6;
+            min-height: 150px;
+        }
+
+        .analyzer-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .analyzer-section p {
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .analyzer-section pre {
+            background: rgba(2, 6, 23, 0.8);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-primary);
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            overflow-x: auto;
+            color: #e5e7eb;
+        }
+
+        /* Chips */
+        .chip {
+            padding: 5px 10px;
+            border: 1px solid rgba(75, 85, 99, 0.9);
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.8);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .analyzer-tabs {
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .analyzer-tab-btn {
+                white-space: nowrap;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(75, 85, 99, 0.7);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.8);
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+    <div class="app-shell container-fluid">
+        
+        <!-- HEADER -->
+        <div class="row g-3 align-items-center mb-3">
+            <div class="col-md-8">
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
+                    <div class="page-title-icon">
+                        <i class="fa-solid fa-diagram-project"></i>
+                    </div>
+                    <div>
+                        <div class="page-title text-uppercase">Real-Time Process Synchronization Analyzer</div>
+                        <div class="page-subtitle">Visualize race conditions, safe locking, and deadlocks.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 text-md-end">
+                <div class="d-flex flex-wrap justify-content-md-end gap-2">
+                    <div class="pill">
+                        <i class="fa-solid fa-microchip"></i>
+                        OS Lab • CSE316
+                    </div>
+                    <div id="severityBadge" class="badge-soft info">No issue detected</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN GRID -->
+        <div class="row g-3">
+
+            <!-- LEFT PANEL -->
+            <div class="col-lg-4">
+                <div class="glass-card mb-3">
+                    <div class="section-title">Scenarios</div>
+
+                    <button class="scenario-btn race" id="btnRace" onclick="runRaceCondition()">
+                        <span class="label">Race Condition <small>Shared counter without lock</small></span>
+                        <span class="icon"><i class="fa-solid fa-bolt"></i></span>
+                    </button>
+
+                    <button class="scenario-btn safe" id="btnSafe" onclick="runSafeSync()">
+                        <span class="label">Safe Sync <small>Mutex protects critical section</small></span>
+                        <span class="icon"><i class="fa-solid fa-shield-halved"></i></span>
+                    </button>
+
+                    <button class="scenario-btn deadlock" id="btnDeadlock" onclick="runDeadlock()">
+                        <span class="label">Deadlock <small>Circular wait situation</small></span>
+                        <span class="icon"><i class="fa-solid fa-lock"></i></span>
+                    </button>
+
+                    <div class="controls-grid mt-1">
+                        <div>
+                            <div class="small-label">Threads</div>
+                            <select id="threadCount" class="form-select form-select-sm">
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5" selected>5</option>
+                                <option value="8">8</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <div class="small-label">Speed</div>
+                            <input id="speedSlider" type="range" min="1" max="4" value="2" class="form-range" />
+                            <div class="d-flex justify-content-between mt-1">
+                                <small class="text-muted">Slow</small>
+                                <small class="text-muted">Fast</small>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="small-label">Reset</div>
+                            <button class="btn btn-sm btn-outline-light w-100" onclick="clearLogAndAnalysis()">
+                                <i class="fa-solid fa-rotate"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUMMARY -->
+                <div class="glass-card">
+                    <div class="section-title">Summary</div>
+
+                    <div class="status-pill" id="statusPill">
+                        <span class="status-dot idle" id="statusDot"></span>
+                        <span id="statusText">Idle – waiting</span>
+                    </div>
+
+                    <div class="row g-2 mt-2">
+                        <div class="col-6"><div class="metric">Scenario <span id="metricScenario" class="value">—</span></div></div>
+                        <div class="col-6"><div class="metric">Issue <span id="metricIssue" class="value">None</span></div></div>
+                        <div class="col-6"><div class="metric">Threads <span id="metricThreads" class="value">0</span></div></div>
+                        <div class="col-6"><div class="metric">Verdict <span id="metricVerdict" class="value">Waiting</span></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <div class="col-lg-8">
+
+                <!-- Log Box -->
+                <div class="glass-card mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="section-title">Execution Timeline</div>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="clearLog()">
+                            <i class="fa-regular fa-trash-can"></i> Clear
+                        </button>
+                    </div>
+                    <div id="logBox" class="log-box"></div>
+                </div>
+
+                <!-- Analyzer Panel -->
+                <div class="glass-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="section-title">Analyzer Panel</div>
+                        <span class="chip"><i class="fa-solid fa-robot"></i> AI Assessment</span>
+                    </div>
+
+                    <div class="analyzer-tabs">
+                        <button id="tabOverviewBtn" class="analyzer-tab-btn active" onclick="switchTab('overview')">Overview</button>
+                        <button id="tabCauseBtn" class="analyzer-tab-btn" onclick="switchTab('cause')">Root Cause</button>
+                        <button id="tabFixBtn" class="analyzer-tab-btn" onclick="switchTab('fix')">Fix</button>
+                        <button id="tabPatternBtn" class="analyzer-tab-btn" onclick="switchTab('pattern')">Pattern</button>
+                        <button id="tabSolutionBtn" class="analyzer-tab-btn" onclick="switchTab('solution')">Solution</button>
+                    </div>
+
+                    <div id="tab-overview" class="analyzer-section active">
+                        <p id="analysisOverview">Run any scenario to generate analysis.</p>
+                    </div>
+                    <div id="tab-cause" class="analyzer-section">
+                        <p id="analysisCause">Cause will appear here after simulation.</p>
+                    </div>
+                    <div id="tab-fix" class="analyzer-section">
+                        <p id="analysisFix">Fix suggestion will appear here.</p>
+                    </div>
+                    <div id="tab-pattern" class="analyzer-section">
+                        <p id="analysisPattern">Synchronization pattern will be shown here.</p>
+                    </div>
+                    <div id="tab-solution" class="analyzer-section">
+                        <p id="analysisSolution">Complete solution code will appear here.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentRunId = 0;
+        let isRunning = false;
+
+        /* Utility: Current Time */
+        function nowTime() {
+            const d = new Date();
+            return d.toLocaleTimeString("en-IN", {
+                hour12: false,
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                fractionalSecondDigits: 2
+            });
+        }
+
+        /* Clear Logs */
+        function clearLog() {
+            document.getElementById("logBox").innerHTML = "";
+        }
+
+        /* Reset Everything */
+        function clearLogAndAnalysis() {
+            if (isRunning) return;
+            
+            clearLog();
+            setStatus("Idle – waiting", "idle");
+
+            updateSummary({
+                scenario: "—",
+                issue: "None",
+                threads: 0,
+                verdict: "Waiting",
+            });
+
+            updateSeverityBadge("info", "No issue detected");
+
+            document.getElementById("analysisOverview").innerHTML =
+                "Run any scenario to generate analysis.";
+            document.getElementById("analysisCause").innerHTML = "Cause will appear here after simulation.";
+            document.getElementById("analysisFix").innerHTML = "Fix suggestion will appear here.";
+            document.getElementById("analysisPattern").innerHTML = "Synchronization pattern will be shown here.";
+            document.getElementById("analysisSolution").innerHTML = "Complete solution code will appear here.";
+
+            // Reset active button
+            ["btnRace", "btnSafe", "btnDeadlock"].forEach((btn) =>
+                document.getElementById(btn).classList.remove("active")
+            );
+        }
+
+        /* Logging Lines */
+        function logLine(type, who, msg, runId) {
+            if (runId !== currentRunId) return;
+
+            const box = document.getElementById("logBox");
+
+            const line = document.createElement("div");
+            line.className = "log-line";
+
+            const time = document.createElement("span");
+            time.className = "log-time";
+            time.textContent = nowTime();
+
+            const tag = document.createElement("span");
+            tag.className = "log-tag " + (type === "system" ? "system" : "thread");
+            tag.textContent = who;
+
+            const text = document.createElement("span");
+            text.className = "log-msg";
+            text.innerHTML = msg;
+
+            line.append(time, tag, text);
+            box.append(line);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        /* Status Light */
+        function setStatus(text, mode) {
+            const dot = document.getElementById("statusDot");
+            const txt = document.getElementById("statusText");
+
+            dot.className = "status-dot " + mode;
+            txt.textContent = text;
+        }
+
+        /* Summary */
+        function updateSummary(obj) {
+            document.getElementById("metricScenario").textContent = obj.scenario;
+            document.getElementById("metricIssue").textContent = obj.issue;
+            document.getElementById("metricThreads").textContent = obj.threads;
+            document.getElementById("metricVerdict").textContent = obj.verdict;
+        }
+
+        /* Badge update */
+        function updateSeverityBadge(level, text) {
+            const badge = document.getElementById("severityBadge");
+            badge.className = "badge-soft " + level;
+            badge.textContent = text;
+        }
+
+        /* Tab Switching */
+        function switchTab(tab) {
+            let allTabs = ["overview", "cause", "fix", "pattern", "solution"];
+
+            allTabs.forEach((id) => {
+                document.getElementById("tab-" + id).classList.remove("active");
+                document.getElementById("tab" + id.charAt(0).toUpperCase() + id.slice(1) + "Btn")
+                    .classList.remove("active");
+            });
+
+            document.getElementById("tab-" + tab).classList.add("active");
+            document.getElementById("tab" + tab.charAt(0).toUpperCase() + tab.slice(1) + "Btn")
+                .classList.add("active");
+        }
+
+        /* Delay based on speed slider */
+        function getDelay() {
+            const speed = parseInt(document.getElementById("speedSlider").value);
+            const delays = { 1: 700, 2: 450, 3: 250, 4: 120 };
+            return delays[speed] || 250;
+        }
+
+        /* Thread Count */
+        function getThreadCount() {
+            return parseInt(document.getElementById("threadCount").value);
+        }
+
+        /* Active Button */
+        function markActiveScenario(id) {
+            ["btnRace", "btnSafe", "btnDeadlock"].forEach((btn) =>
+                document.getElementById(btn).classList.remove("active")
+            );
+            document.getElementById(id).classList.add("active");
+        }
+
+        /* ------------------------------------
+           RACE CONDITION SIMULATION
+        ------------------------------------ */
+        function runRaceCondition() {
+            if (isRunning) return;
+            isRunning = true;
+            
+            currentRunId++;
+            const runId = currentRunId;
+
+            clearLog();
+            markActiveScenario("btnRace");
+
+            const threads = getThreadCount();
+            const delay = getDelay();
+
+            setStatus("Running race condition", "running");
+
+            updateSummary({
+                scenario: "Race Condition",
+                issue: "Data Race",
+                threads: threads,
+                verdict: "Unsafe"
+            });
+
+            updateSeverityBadge("danger", "Race issue detected");
+
+            logLine("system", "SYSTEM", `Race condition simulation started with ${threads} threads`, runId);
+
+            let counter = 0;
+            const expected = threads * 2;
+            let completed = 0;
+
+            for (let t = 1; t <= threads; t++) {
+                setTimeout(() => {
+                    if (runId !== currentRunId) return;
+                    
+                    let local = counter;
+                    logLine("thread", "T" + t, `READ counter = ${local}`, runId);
+
+                    setTimeout(() => {
+                        if (runId !== currentRunId) return;
+                        
+                        local += 2;
+                        counter = local;
+
+                        logLine("thread", "T" + t, `WRITE counter = ${local}`, runId);
+
+                        completed++;
+                        if (completed === threads) {
+                            showRaceResult(runId, counter, expected);
+                        }
+
+                    }, delay);
+                }, t * delay);
+            }
+        }
+
+        function showRaceResult(runId, counter, expected) {
+            logLine("system", "ANALYZER",
+                `Final counter = ${counter}, Expected = ${expected}`, runId);
+
+            setStatus("Race Condition Detected", "error");
+
+            fillAnalyzer(
+                "Threads accessed shared data without synchronization, leading to inconsistent results.",
+                "Multiple threads performed READ → MODIFY → WRITE operations on the same variable without protection. Threads read stale values and overwrite each other's updates.",
+                "Use a mutex (mutual exclusion lock) to protect the critical section. Only one thread can enter the critical section at a time.",
+                "Pattern: acquire(lock) → critical section → release(lock)",
+                `<b>Solution:</b><br>
+Use a mutex to synchronize access:<br><pre>
+#include &lt;pthread.h&gt;
+
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+int counter = 0;
+
+void* thread_function(void* arg) {
+    pthread_mutex_lock(&lock);    // Acquire lock
+    counter += 2;                // Critical section
+    pthread_mutex_unlock(&lock);  // Release lock
+    return NULL;
+}</pre>
+This ensures atomic access to the shared counter.`
+            );
+
+            isRunning = false;
+            switchTab("solution");
+        }
+
+        /* ------------------------------------
+           SAFE SYNCHRONIZATION
+        ------------------------------------ */
+        function runSafeSync() {
+            if (isRunning) return;
+            isRunning = true;
+            
+            currentRunId++;
+            const runId = currentRunId;
+
+            clearLog();
+            markActiveScenario("btnSafe");
+
+            const threads = getThreadCount();
+            const delay = getDelay();
+
+            setStatus("Running safe synchronization", "running");
+
+            updateSummary({
+                scenario: "Safe Sync",
+                issue: "None",
+                threads: threads,
+                verdict: "Safe"
+            });
+
+            updateSeverityBadge("ok", "No issue detected");
+
+            logLine("system", "SYSTEM", `Safe sync simulation started with ${threads} threads using mutex`, runId);
+
+            let counter = 0;
+            const expected = threads * 2;
+
+            let lockBusy = false;
+            let queue = [];
+            let completed = 0;
+
+            function acquireLock(cb, name) {
+                const attempt = () => {
+                    if (!lockBusy) {
+                        lockBusy = true;
+                        logLine("system", "LOCK", `${name} acquired mutex lock`, runId);
+                        cb();
+                    } else {
+                        queue.push(attempt);
+                        logLine("system", "LOCK", `${name} waiting for mutex`, runId);
+                    }
+                };
+                attempt();
+            }
+
+            function releaseLock(name) {
+                lockBusy = false;
+                logLine("system", "LOCK", `${name} released mutex`, runId);
+                if (queue.length > 0) {
+                    setTimeout(() => queue.shift()(), 50);
+                }
+            }
+
+            for (let t = 1; t <= threads; t++) {
+                const name = "T" + t;
+
+                setTimeout(() => {
+                    if (runId !== currentRunId) return;
+                    
+                    acquireLock(() => {
+                        let before = counter;
+                        logLine("thread", name, `ENTER critical section: counter = ${before}`, runId);
+
+                        // Simulate some work
+                        setTimeout(() => {
+                            counter = before + 2;
+                            logLine("thread", name, `UPDATE counter = ${counter}`, runId);
+
+                            releaseLock(name);
+
+                            completed++;
+                            if (completed === threads) {
+                                showSafeSyncResult(runId, counter, expected);
+                            }
+                        }, delay / 2);
+
+                    }, name);
+                }, t * delay);
+            }
+        }
+
+        function showSafeSyncResult(runId, counter, expected) {
+            logLine("system", "ANALYZER",
+                `Final counter = ${counter}, Expected = ${expected} ✓`, runId);
+
+            setStatus("Safe Execution Completed", "idle");
+
+            fillAnalyzer(
+                "Mutex ensured correct synchronization. All threads accessed shared data safely.",
+                "Only one thread could enter the critical section at a time due to mutex protection. No race conditions occurred.",
+                "No fix required - this implementation correctly uses mutex for synchronization.",
+                "Pattern: wait(mutex) → critical section → signal(mutex)",
+                `<b>Solution:</b><br>
+This implementation is CORRECT.<br>
+The mutex properly synchronizes access to the shared counter:<br><pre>
+#include &lt;pthread.h&gt;
+
+pthread_mutex_t lock;
+int shared_counter = 0;
+
+void safe_increment() {
+    pthread_mutex_lock(&lock);
+    shared_counter += 2;  // Thread-safe operation
+    pthread_mutex_unlock(&lock);
+}</pre>
+Always ensure lock is released even if exceptions occur.`
+            );
+
+            isRunning = false;
+            switchTab("solution");
+        }
+
+        /* ------------------------------------
+           DEADLOCK SIMULATION
+        ------------------------------------ */
+        function runDeadlock() {
+            if (isRunning) return;
+            isRunning = true;
+            
+            currentRunId++;
+            const runId = currentRunId;
+
+            clearLog();
+            markActiveScenario("btnDeadlock");
+
+            const delay = getDelay();
+
+            setStatus("Simulating Deadlock...", "running");
+
+            updateSummary({
+                scenario: "Deadlock",
+                issue: "Circular Wait",
+                threads: 2,
+                verdict: "Blocked"
+            });
+
+            updateSeverityBadge("warn", "Deadlock Detected");
+
+            logLine("system", "SYSTEM", "Deadlock simulation started with 2 threads", runId);
+
+            // Simulate deadlock sequence
+            setTimeout(() => {
+                if (runId !== currentRunId) return;
+                logLine("thread", "T1", "Acquired lock on Resource A", runId);
+            }, delay);
+            
+            setTimeout(() => {
+                if (runId !== currentRunId) return;
+                logLine("thread", "T2", "Acquired lock on Resource B", runId);
+            }, delay * 2);
+            
+            setTimeout(() => {
+                if (runId !== currentRunId) return;
+                logLine("thread", "T1", "Waiting for Resource B (held by T2)...", runId);
+            }, delay * 3);
+            
+            setTimeout(() => {
+                if (runId !== currentRunId) return;
+                logLine("thread", "T2", "Waiting for Resource A (held by T1)...", runId);
+            }, delay * 4);
+
+            setTimeout(() => {
+                if (runId !== currentRunId) return;
+                showDeadlockResult(runId);
+            }, delay * 5);
+        }
+
+        function showDeadlockResult(runId) {
+            logLine("system", "ANALYZER", "DEADLOCK DETECTED: Circular wait condition", runId);
+            logLine("system", "ANALYZER", "Thread T1: Has A, wants B", runId);
+            logLine("system", "ANALYZER", "Thread T2: Has B, wants A", runId);
+
+            setStatus("Deadlock Occurred", "error");
+
+            fillAnalyzer(
+                "Two threads created a circular wait situation, causing deadlock. Both threads are blocked indefinitely.",
+                "T1 locked Resource A and waits for Resource B. T2 locked Resource B and waits for Resource A. This creates a circular wait (one of the four necessary conditions for deadlock).",
+                "Implement lock ordering: always acquire locks in the same order (e.g., always lock A before B). Alternatively, use timeout mechanisms or deadlock detection algorithms.",
+                "Pattern: Circular wait → deadlock",
+                `<b>Solution:</b><br>
+Always acquire locks in a predefined global order:<br><pre>
+// CORRECT: Both threads acquire locks in same order
+void thread1() {
+    lock(A);
+    lock(B);
+    // critical section
+    unlock(B);
+    unlock(A);
+}
+
+void thread2() {
+    lock(A);    // Same order as thread1
+    lock(B);
+    // critical section
+    unlock(B);
+    unlock(A);
+}</pre>
+
+Alternative: Use try-lock with timeout:<br><pre>
+pthread_mutex_trylock(&lockB);
+if (failed) {
+    pthread_mutex_unlock(&lockA);
+    // retry or handle
+}</pre>`
+            );
+
+            isRunning = false;
+            switchTab("solution");
+        }
+
+        /* ------------------------------------
+           HELPER FUNCTIONS
+        ------------------------------------ */
+        function fillAnalyzer(overview, cause, fix, pattern, solution) {
+            document.getElementById("analysisOverview").innerHTML = overview;
+            document.getElementById("analysisCause").innerHTML = cause;
+            document.getElementById("analysisFix").innerHTML = fix;
+            document.getElementById("analysisPattern").innerHTML = pattern;
+            document.getElementById("analysisSolution").innerHTML = solution;
+        }
+
+        /* Initialize */
+        clearLogAndAnalysis();
+        
+        // Add event listeners for better UX
+        document.addEventListener('DOMContentLoaded', function() {
+            // Speed slider value display
+            const speedSlider = document.getElementById('speedSlider');
+            speedSlider.addEventListener('input', function() {
+                const speedLabels = ['Slow', 'Medium', 'Fast', 'Very Fast'];
+                const speedDisplay = speedLabels[this.value - 1] || 'Medium';
+                this.parentElement.querySelector('.text-muted:nth-child(3)').textContent = speedDisplay;
+            });
+            
+            // Thread count update
+            const threadSelect = document.getElementById('threadCount');
+            threadSelect.addEventListener('change', function() {
+                document.getElementById('metricThreads').textContent = this.value;
+            });
+        });
+    </script>
+</body>
+</html>

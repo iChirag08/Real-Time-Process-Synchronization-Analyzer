@@ -889,7 +889,6 @@ This ensures atomic access to the shared counter.`
                 };
                 attempt();
             }
-
             function releaseLock(name) {
                 lockBusy = false;
                 logLine("system", "LOCK", `${name} released mutex`, runId);
@@ -897,7 +896,6 @@ This ensures atomic access to the shared counter.`
                     setTimeout(() => queue.shift()(), 50);
                 }
             }
-
             for (let t = 1; t <= threads; t++) {
                 const name = "T" + t;
 
@@ -1083,6 +1081,7 @@ if (failed) {
 </body>
 
 </html>
+
 
 
 
